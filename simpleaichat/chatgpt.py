@@ -16,7 +16,7 @@ tool_prompt = """From the list of tools below:
 OPEN_API_URL = "https://api.openai.com/v1/chat/completions"
 
 class ChatGPTSession(ChatSession):
-    api_url: HttpUrl = os.get_env("SIMPLEAICHAT_API_URL", OPEN_API_URL)
+    api_url: HttpUrl = os.getenv("SIMPLEAICHAT_API_URL", OPEN_API_URL)
     input_fields: Set[str] = {"role", "content", "name"}
     system: str = "You are a helpful assistant."
     params: Dict[str, Any] = {"temperature": 0.7}
