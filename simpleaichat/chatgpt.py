@@ -1,3 +1,4 @@
+import json
 import os
 from pydantic import HttpUrl
 from httpx import Client, AsyncClient
@@ -135,6 +136,11 @@ class ChatGPTSession(ChatSession):
             self.total_length += r["usage"]["total_tokens"]
         except KeyError:
             raise KeyError(f"No AI generation: {r}")
+        except orjson.JSONDecodeError:
+            try:
+                content = json.loads(content, strict=False)
+            except json.JSONDecodeError as e:
+                raise json.JSONDecodeError(f"Error: {e.msg}, content: {content}")
 
         return content
 
