@@ -170,7 +170,10 @@ class ChatGPTSession(ChatSession):
                     chunk = chunk[6:]  # SSE JSON chunks are prepended with "data: "
                     if chunk != "[DONE]":
                         chunk_dict = orjson.loads(chunk)
-                        delta = chunk_dict["choices"][0]["delta"].get("content")
+                        if chunk_dict["choices"]:
+                            delta = chunk_dict["choices"][0]["delta"].get("content")
+                        else:
+                            delta = None
                         if delta:
                             content.append(delta)
                             yield {"delta": delta, "response": "".join(content)}
@@ -328,7 +331,10 @@ class ChatGPTSession(ChatSession):
                     chunk = chunk[6:]  # SSE JSON chunks are prepended with "data: "
                     if chunk != "[DONE]":
                         chunk_dict = orjson.loads(chunk)
-                        delta = chunk_dict["choices"][0]["delta"].get("content")
+                        if chunk_dict["choices"]:
+                            delta = chunk_dict["choices"][0]["delta"].get("content")
+                        else:
+                            delta = None
                         if delta:
                             content.append(delta)
                             yield {"delta": delta, "response": "".join(content)}
