@@ -143,6 +143,7 @@ class ChatGPTSession(ChatSession):
                 raise json.JSONDecodeError(f"Error: {e.msg}, content: {content}")
 
         return content
+    
 
     def stream(
         self,
@@ -152,9 +153,10 @@ class ChatGPTSession(ChatSession):
         save_messages: bool = None,
         params: Dict[str, Any] = None,
         input_schema: Any = None,
+        output_schema: Any = None,
     ):
         headers, data, user_message = self.prepare_request(
-            prompt, system, params, True, input_schema
+            prompt, system, params, True, input_schema, output_schema
         )
 
         with client.stream(
@@ -171,7 +173,10 @@ class ChatGPTSession(ChatSession):
                     if chunk != "[DONE]":
                         chunk_dict = orjson.loads(chunk)
                         if chunk_dict["choices"]:
-                            delta = chunk_dict["choices"][0]["delta"].get("content")
+                            if output_schema is not None:
+                              delta = chunk_dict.get("choices")[0].get("delta", dict()).get("function_call", dict()).get("arguments", '')
+                            else:
+                              delta = chunk_dict["choices"][0]["delta"].get("content")
                         else:
                             delta = None
                         if delta:
@@ -313,9 +318,10 @@ class ChatGPTSession(ChatSession):
         save_messages: bool = None,
         params: Dict[str, Any] = None,
         input_schema: Any = None,
+        output_schema: Any = None,
     ):
         headers, data, user_message = self.prepare_request(
-            prompt, system, params, True, input_schema
+            prompt, system, params, True, input_schema, output_schema
         )
 
         async with client.stream(
@@ -332,7 +338,11 @@ class ChatGPTSession(ChatSession):
                     if chunk != "[DONE]":
                         chunk_dict = orjson.loads(chunk)
                         if chunk_dict["choices"]:
-                            delta = chunk_dict["choices"][0]["delta"].get("content")
+                            if output_schema is not None:
+                              delta = chunk_dict.get("choices")[0].get("delta", dict()).get("function_call", dict()).get("arguments", '')
+                            else:
+                              delta = chunk_dict["choices"][0]["delta"].get("content")
+                            
                         else:
                             delta = None
                         if delta:
